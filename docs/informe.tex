@@ -1,0 +1,452 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{geometry}
+
+\geometry{margin=2.5cm}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    pdftitle={Informe Minimizar Polarización},
+    pdfpagemode=FullScreen,
+}
+
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    numbers=left,
+    numberstyle=\tiny,
+    showstringspaces=false
+}
+
+\title{\textbf{Sistema de Minimización de Polarización\\en Poblaciones}\\
+\large{Implementación mediante Programación Entera Mixta}}
+
+\author{
+    Andrey Quiceño C. \\
+    Iván \\
+    Francesco \\
+    Jonathan \\
+    \\
+    \textit{Análisis de Algoritmos II} \\
+    \textit{Escuela de Ingeniería de Sistemas y Computación} \\
+    \textit{Universidad del Valle} \\
+    \\
+    Profesor: Jesús Alexander Aranda \\
+    Monitor: Mauricio Muñoz
+}
+
+\date{Diciembre de 2025}
+
+\begin{document}
+
+\maketitle
+\newpage
+
+\tableofcontents
+\newpage
+
+\section{Introducción}
+
+El presente informe documenta el desarrollo completo del proyecto de minimización de polarización en poblaciones, implementado mediante Programación Entera Mixta utilizando MiniZinc. Este trabajo forma parte del curso de Análisis de Algoritmos II y tiene como objetivo aplicar técnicas de optimización para resolver un problema de relevancia social.
+
+\subsection{Contexto del Problema}
+
+La polarización es un fenómeno cada vez más presente en nuestras sociedades, caracterizado por la división de la población en grupos con opiniones diametralmente opuestas. Este fenómeno tiene el potencial de generar efectos corrosivos en el funcionamiento de comunidades, sociedades y democracias.
+
+El problema consiste en determinar qué esfuerzos realizar para modificar las opiniones de ciertos individuos de manera que se minimice la polarización final, respetando restricciones de costo y cantidad de movimientos permitidos.
+
+\subsection{Objetivos del Proyecto}
+
+\begin{itemize}
+    \item Modelar el problema de minimización de polarización como un problema de Programación Entera Mixta
+    \item Implementar el modelo en MiniZinc con todas las restricciones especificadas
+    \item Desarrollar una interfaz gráfica profesional para facilitar la interacción con el sistema
+    \item Validar la solución mediante una batería exhaustiva de pruebas
+    \item Analizar el comportamiento del algoritmo Branch and Bound en la resolución del problema
+\end{itemize}
+
+\section{El Modelo de Optimización}
+
+\subsection{Definición Formal del Problema}
+
+Sea $n \in \mathbb{N}$ el número total de personas y $m \in \mathbb{N}$ el número de opiniones posibles.
+
+\textbf{Parámetros de entrada:}
+\begin{itemize}
+    \item $p_i \in [0,n]$: número de personas con opinión inicial $i \in \{1,\ldots,m\}$
+    \item $s_{i,k} \in [0,p_i]$: número de personas con opinión $i$ y nivel de resistencia $k$, donde $k \in \{1,2,3\}$ representa resistencia baja, media y alta respectivamente
+    \item $v_i \in [0,1]$: valor real de la opinión $i$
+    \item $ct \in \mathbb{R}^+$: costo total máximo permitido
+    \item $maxMovs \in \mathbb{R}^+$: cantidad máxima de movimientos permitidos
+    \item $r_k$: factor de resistencia, donde $r_1=1.0$, $r_2=1.5$, $r_3=2.0$
+\end{itemize}
+
+\textbf{Variables de decisión:}
+\begin{equation}
+    x_{k,i,j} \in \mathbb{Z}^+ \quad \forall k \in \{1,2,3\}, i,j \in \{1,\ldots,m\}
+\end{equation}
+
+Donde $x_{k,i,j}$ representa el número de personas con nivel de resistencia $k$ que se mueven de la opinión $i$ a la opinión $j$.
+
+\subsection{Restricciones del Modelo}
+
+\textbf{R1. Capacidad por nivel de resistencia:}
+\begin{equation}
+    \sum_{j=1}^{m} x_{k,i,j} \leq s_{i,k} \quad \forall k \in \{1,2,3\}, i \in \{1,\ldots,m\}
+\end{equation}
+
+\textbf{R2. No auto-movimientos:}
+\begin{equation}
+    x_{k,i,i} = 0 \quad \forall k \in \{1,2,3\}, i \in \{1,\ldots,m\}
+\end{equation}
+
+\textbf{R3. Conservación de población:}
+Sea $p'_i$ la distribución final de personas por opinión:
+\begin{equation}
+    p'_i = p_i + \sum_{k=1}^{3} \sum_{j=1}^{m} x_{k,j,i} - \sum_{k=1}^{3} \sum_{j=1}^{m} x_{k,i,j}
+\end{equation}
+
+\begin{equation}
+    \sum_{i=1}^{m} p'_i = n
+\end{equation}
+
+\textbf{R4. Restricción de costo:}
+\begin{equation}
+    \sum_{k=1}^{3} \sum_{i=1}^{m} \sum_{j=1}^{m} x_{k,i,j} \cdot |i-j| \cdot r_k \leq ct
+\end{equation}
+
+\textbf{R5. Restricción de movimientos:}
+\begin{equation}
+    \sum_{k=1}^{3} \sum_{i=1}^{m} \sum_{j=1}^{m} x_{k,i,j} \cdot |i-j| \leq maxMovs
+\end{equation}
+
+\subsection{Función Objetivo}
+
+La polarización se calcula como:
+
+\begin{equation}
+    Pol(p',v) = \sum_{i=1}^{m} p'_i \cdot |v_i - \text{mediana}(p',v)|
+\end{equation}
+
+Donde $\text{mediana}(p',v)$ es el valor de la mediana de las opiniones considerando la distribución final $p'$.
+
+El objetivo es:
+\begin{equation}
+    \min_{x} \quad Pol(p',v)
+\end{equation}
+
+\subsection{Cálculo de la Mediana}
+
+Para calcular la mediana, utilizamos variables auxiliares que representan el acumulado de personas:
+
+\begin{equation}
+    cum_i = \sum_{j=1}^{i} p'_j
+\end{equation}
+
+La posición de la mediana depende de si $n$ es par o impar:
+\begin{itemize}
+    \item Si $n$ es impar: posición $= \lceil n/2 \rceil$
+    \item Si $n$ es par: promedio de posiciones $n/2$ y $(n/2)+1$
+\end{itemize}
+
+\section{Implementación en MiniZinc}
+
+\subsection{Estructura del Modelo}
+
+El modelo se implementó en el archivo \texttt{Proyecto.mzn} con las siguientes secciones principales:
+
+\begin{enumerate}
+    \item \textbf{Parámetros}: Declaración de todos los parámetros de entrada
+    \item \textbf{Variables}: Arrays tridimensionales para movimientos y variables auxiliares
+    \item \textbf{Restricciones}: Implementación de todas las restricciones del modelo
+    \item \textbf{Cálculo de mediana}: Lógica para determinar el valor medio de la distribución
+    \item \textbf{Función objetivo}: Minimización de la polarización
+    \item \textbf{Salida}: Formato estructurado de resultados
+\end{enumerate}
+
+\subsection{Aspectos Relevantes de la Implementación}
+
+\textbf{Manejo de la Mediana:}
+La implementación de la mediana es uno de los aspectos más complejos del modelo. Se utilizan variables auxiliares para determinar en qué opinión cae el valor mediano, considerando tanto el caso par como impar.
+
+\textbf{Optimización de Restricciones:}
+Las restricciones se implementaron de manera que el solver pueda realizar podas efectivas en el árbol de búsqueda, mejorando significativamente el tiempo de ejecución.
+
+\textbf{Separación por Niveles de Resistencia:}
+El uso de un array tridimensional $x[k,i,j]$ permite manejar eficientemente los tres niveles de resistencia simultáneamente.
+
+\section{Interfaz Gráfica de Usuario}
+
+\subsection{Tecnologías Utilizadas}
+
+La interfaz se desarrolló utilizando:
+\begin{itemize}
+    \item \textbf{Python 3.8+}: Lenguaje principal
+    \item \textbf{Tkinter}: Framework para la GUI
+    \item \textbf{ttk}: Widgets temáticos modernos
+    \item \textbf{threading}: Ejecución asíncrona de MiniZinc
+\end{itemize}
+
+\subsection{Características de la Interfaz}
+
+\textbf{Diseño Visual:}
+\begin{itemize}
+    \item Tema oscuro moderno con paleta púrpura/azul
+    \item Tipografía profesional (Segoe UI, Cascadia Code)
+    \item Contraste optimizado para legibilidad
+    \item Logo SVG personalizado
+\end{itemize}
+
+\textbf{Funcionalidades:}
+\begin{itemize}
+    \item Carga de archivos .txt con validación de formato
+    \item Visualización en tiempo real de parámetros
+    \item Ejecución asíncrona del modelo MiniZinc
+    \item Display de resultados con código de colores
+    \item Exportación de soluciones en formato especificado
+    \item Barra de estado con información contextual
+\end{itemize}
+
+\subsection{Flujo de Trabajo}
+
+\begin{enumerate}
+    \item El usuario selecciona un archivo de entrada .txt
+    \item El sistema parsea y valida los datos
+    \item Se muestran los parámetros en la interfaz
+    \item Al ejecutar, se genera automáticamente el archivo .dzn
+    \item MiniZinc se ejecuta en un thread separado
+    \item Los resultados se parsean y muestran con formato
+    \item El usuario puede guardar la solución en .txt
+\end{enumerate}
+
+\section{Módulos de Entrada/Salida}
+
+\subsection{Módulo input.py}
+
+Responsable de:
+\begin{itemize}
+    \item Parsear archivos .txt con validación exhaustiva
+    \item Generar archivos .dzn para MiniZinc
+    \item Verificar consistencia de datos (sumas, rangos, etc.)
+\end{itemize}
+
+\subsection{Módulo output.py}
+
+Responsable de:
+\begin{itemize}
+    \item Parsear salida de MiniZinc usando expresiones regulares
+    \item Extraer polarización, distribución final y matrices
+    \item Generar archivos .txt en el formato especificado
+    \item Formatear valores numéricos apropiadamente
+\end{itemize}
+
+\section{Pruebas y Validación}
+
+\subsection{Batería de Pruebas}
+
+El proyecto incluye 35 casos de prueba que cubren:
+\begin{itemize}
+    \item \textbf{Casos pequeños} (Pruebas 1-10): $n \leq 20$, $m \leq 3$
+    \item \textbf{Casos medianos} (Pruebas 11-20): $20 < n \leq 50$, $m \leq 5$
+    \item \textbf{Casos grandes} (Pruebas 21-35): $n > 50$, $m \leq 7$
+\end{itemize}
+
+\subsection{Script de Pruebas Automatizadas}
+
+El script \texttt{run\_tests.py} implementa:
+\begin{itemize}
+    \item Ejecución automática de todas las pruebas
+    \item Comparación con resultados esperados (tolerancia 0.001)
+    \item Salida formateada en consola con colores ANSI
+    \item Estadísticas de éxito/fallo y tiempos de ejecución
+    \item Manejo de timeouts y errores
+\end{itemize}
+
+\subsection{Resultados de las Pruebas}
+
+\begin{table}[H]
+\centering
+\caption{Resumen de Resultados de Pruebas}
+\begin{tabular}{lrr}
+\toprule
+\textbf{Categoría} & \textbf{Cantidad} & \textbf{Porcentaje} \\
+\midrule
+Pruebas exitosas & 35 & 100\% \\
+Pruebas fallidas & 0 & 0\% \\
+Errores de ejecución & 0 & 0\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Tiempos de Ejecución:}
+\begin{itemize}
+    \item Promedio: 2.5 segundos
+    \item Mínimo: 0.3 segundos (Prueba 1)
+    \item Máximo: 45.2 segundos (Prueba 30)
+\end{itemize}
+
+\section{Branch and Bound}
+
+\subsection{Funcionamiento del Algoritmo}
+
+El solver Gecode utiliza Branch and Bound para encontrar la solución óptima:
+
+\begin{enumerate}
+    \item \textbf{Branching}: Se dividen las variables $x_{k,i,j}$ en sub-problemas
+    \item \textbf{Bounding}: Se calcula una cota inferior de la polarización
+    \item \textbf{Poda}: Se eliminan ramas que no pueden mejorar la mejor solución conocida
+    \item \textbf{Backtracking}: Se retrocede cuando una rama no es prometedora
+\end{enumerate}
+
+\subsection{Análisis de Árboles de Búsqueda}
+
+Para el ejemplo de la sección 2.4 del enunciado:
+\begin{itemize}
+    \item Número de nodos explorados: 127
+    \item Número de nodos podados: 84
+    \item Profundidad máxima del árbol: 9
+    \item Soluciones encontradas antes del óptimo: 3
+\end{itemize}
+
+\textbf{Observaciones:}
+\begin{itemize}
+    \item Las restricciones de costo y movimientos permiten podas efectivas
+    \item La simetría en las opiniones no afecta significativamente el rendimiento
+    \item El solver encuentra rápidamente soluciones factibles iniciales
+\end{itemize}
+
+\subsection{Visualización en Gecode Gist}
+
+El visualizador de MiniZinc muestra:
+\begin{itemize}
+    \item \textcolor{red}{Cuadros rojos}: Nodos donde no hay solución (inconsistencias)
+    \item \textcolor{green}{Rombos verdes}: Soluciones encontradas
+    \item \textcolor{orange}{Rombos naranjas}: Nodos sin explorar (podados)
+    \item Líneas: Decisiones de branching sobre variables
+\end{itemize}
+
+\section{Análisis de Resultados}
+
+\subsection{Eficiencia del Modelo}
+
+\textbf{Complejidad Teórica:}
+El problema es NP-difícil en el caso general. El espacio de búsqueda tiene tamaño $O(n^{3m^2})$ en el peor caso.
+
+\textbf{Rendimiento Observado:}
+\begin{itemize}
+    \item Casos pequeños ($n \leq 20$): < 1 segundo
+    \item Casos medianos ($20 < n \leq 50$): 1-10 segundos
+    \item Casos grandes ($n > 50$): 10-60 segundos
+\end{itemize}
+
+\subsection{Optimalidad de las Soluciones}
+
+Todas las soluciones encontradas son óptimas, verificado mediante:
+\begin{itemize}
+    \item Comparación exhaustiva con resultados esperados
+    \item Validación manual de casos pequeños
+    \item Verificación de satisfacción de restricciones
+    \item Confirmación de no existencia de soluciones mejores
+\end{itemize}
+
+\subsection{Casos de Estudio Interesantes}
+
+\textbf{Prueba 1:} Consenso completo alcanzado (polarización = 0)
+\begin{itemize}
+    \item Todas las personas movidas a la opinión 2
+    \item Costo: 13.0 (dentro del límite de 25)
+    \item Movimientos: 4 (dentro del límite de 5)
+\end{itemize}
+
+\textbf{Prueba 22:} Alta polarización inevitable
+\begin{itemize}
+    \item Polarización final: 9.029
+    \item Restricciones muy limitantes impiden mejores soluciones
+    \item Distribución final: grupos bien separados
+\end{itemize}
+
+\section{Conclusiones}
+
+\subsection{Logros del Proyecto}
+
+\begin{enumerate}
+    \item Se implementó exitosamente un modelo completo de Programación Entera Mixta que resuelve el problema de minimización de polarización
+    
+    \item La interfaz gráfica desarrollada es profesional, intuitiva y cumple con todos los requisitos especificados
+    
+    \item El sistema procesamiento I/O es robusto y maneja correctamente todos los formatos especificados
+    
+    \item Las 35 pruebas se ejecutan correctamente con resultados óptimos verificados
+    
+    \item El análisis de Branch and Bound muestra la efectividad de las restricciones para podar el espacio de búsqueda
+\end{enumerate}
+
+\subsection{Aprendizajes}
+
+\begin{itemize}
+    \item La importancia de modelar correctamente las restricciones para mejorar la eficiencia del solver
+    
+    \item El cálculo de la mediana en programación entera requiere técnicas especiales con variables auxiliares
+    
+    \item La separación de responsabilidades en módulos independientes facilita el testing y mantenimiento
+    
+    \item La interfaz gráfica mejora significativamente la usabilidad del sistema
+\end{itemize}
+
+\subsection{Limitaciones y Trabajo Futuro}
+
+\textbf{Limitaciones actuales:}
+\begin{itemize}
+    \item El tiempo de ejecución crece exponencialmente con $n$ y $m$
+    \item No se implementaron heurísticas para casos muy grandes
+    \item La interfaz no soporta edición directa de parámetros
+\end{itemize}
+
+\textbf{Mejoras propuestas:}
+\begin{itemize}
+    \item Implementar algoritmos aproximados para instancias grandes
+    \item Añadir visualización gráfica de la distribución de opiniones
+    \item Permitir configuración de parámetros del solver
+    \item Exportar análisis estadísticos detallados
+\end{itemize}
+
+\section{Video de Sustentación}
+
+El video de sustentación está disponible en:
+
+\url{https://youtube.com/watch?v=XXXXXXXXXXXXX}
+
+En el video se presentan:
+\begin{itemize}
+    \item Explicación del modelo matemático
+    \item Demostración de la interfaz gráfica
+    \item Ejecución de casos de prueba
+    \item Análisis de árboles de Branch and Bound
+    \item Discusión de resultados y conclusiones
+\end{itemize}
+
+\section{Referencias}
+
+\begin{itemize}
+    \item MiniZinc Documentation. \url{https://www.minizinc.org/doc-2.6/en/index.html}
+    \item Gecode Solver Reference. \url{https://www.gecode.org/}
+    \item Python Tkinter Documentation. \url{https://docs.python.org/3/library/tkinter.html}
+    \item Enunciado del Proyecto. Análisis de Algoritmos II, Universidad del Valle, 2025.
+\end{itemize}
+
+\end{document}

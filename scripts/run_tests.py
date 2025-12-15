@@ -164,17 +164,41 @@ def extract_polarization(minizinc_output: str) -> float:
     Extrae el valor de polarización de la salida de MiniZinc.
     
     Args:
-        minizinc_output: Salida de MiniZinc
+        minizinc_output: Salida de MiniZinc (JSON o texto)
         
     Returns:
         Valor de polarización
     """
     try:
+        # Intentar parsear como JSON (puede ser multilínea)
+        import json
+        # Separar por los delimitadores de solución
+        parts = minizinc_output.split('----------')
+        for part in parts:
+            part = part.strip()
+            if part and part.startswith('{'):
+                # Puede ser JSON multilínea, tomar hasta el cierre
+                json_end = part.find('}\n')
+                if json_end == -1:
+                    json_end = part.find('}')
+                if json_end != -1:
+                    json_str = part[:json_end+1]
+                    try:
+                        data = json.loads(json_str)
+                        if 'polarization' in data:
+                            return float(data['polarization'])
+                    except:
+                        continue
+    except:
+        pass
+    
+    try:
+        # Intentar con el parser estándar
         parsed = parse_minizinc_output(minizinc_output)
         return parsed.get('polarization', None)
     except:
-        # Intentar extraer directamente
-        match = re.search(r'polarization=([\d.]+)', minizinc_output)
+        # Intentar extraer directamente con regex
+        match = re.search(r'polarization=(-?[\d.]+(?:[eE][+-]?\d+)?)', minizinc_output)
         if match:
             return float(match.group(1))
         return None

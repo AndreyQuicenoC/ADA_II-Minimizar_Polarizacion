@@ -28,8 +28,8 @@ def parse_minizinc_output(output_str: str) -> Dict:
     result = {}
     
     try:
-        # Extraer polarización
-        pol_match = re.search(r'polarization=([\d.]+)', output_str)
+        # Extraer polarización (incluye negativos y notación científica)
+        pol_match = re.search(r'polarization=(-?[\d.]+(?:[eE][+-]?\d+)?)', output_str)
         if pol_match:
             result['polarization'] = float(pol_match.group(1))
         else:
@@ -92,7 +92,9 @@ def generate_output_file(minizinc_output: str, output_path: str, m: int):
         
         with open(output_path, 'w', encoding='utf-8') as f:
             # Línea 1: Polarización (redondeada a 3 decimales)
+            # Convertir -0.0 a 0.0 para evitar valores negativos en cero
             pol = parsed['polarization']
+            pol = abs(pol) if abs(pol) < 0.0001 else pol
             f.write(f"{pol:.3f}\n")
             
             # Para cada nivel de resistencia

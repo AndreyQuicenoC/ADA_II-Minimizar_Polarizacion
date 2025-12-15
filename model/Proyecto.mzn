@@ -115,11 +115,11 @@ constraint forall(i in 2..m)(
 var 1..m: median_opinion;
 
 % median_opinion es la primera opinión cuyo acumulado >= median_pos
-constraint forall(i in 1..m)(
-    (cumulative[i] >= median_pos) -> (
-        (i = 1 \/ cumulative[i-1] < median_pos) -> median_opinion = i
-    )
+constraint cumulative[median_opinion] >= median_pos;
+constraint forall(i in 1..m where i < median_opinion)(
+    cumulative[i] < median_pos
 );
+
 
 % El valor de la mediana es el valor de esa opinión
 constraint median_value = v[median_opinion];

@@ -475,6 +475,8 @@ class PolarizationGUI:
             self.write_output("RESULTADOS DE LA OPTIMIZACIÓN\n", 'success')
             self.write_output("═" * 80 + "\n\n", 'header')
             
+            # Convertir -0.0 a 0.0 para evitar mostrar valores negativos en cero
+            pol = abs(pol) if abs(pol) < 0.0001 else pol
             self.write_output(f"✓ Polarización final: ", 'success')
             self.write_output(f"{pol:.3f}\n\n", 'accent')
             
@@ -593,5 +595,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()if __name__ == "__main__":
     main()

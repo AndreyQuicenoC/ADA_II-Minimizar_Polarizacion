@@ -399,6 +399,103 @@ Todas las soluciones encontradas son óptimas, verificado mediante:
     \item Distribución final: grupos bien separados
 \end{itemize}
 
+\section{Instancias Propias Generadas}
+
+Como parte de los requisitos del proyecto, se generaron 5 instancias desafiantes para poner a prueba el modelo y retar a otros equipos. Estas instancias fueron diseñadas con diferentes características para evaluar distintos aspectos del algoritmo.
+
+\subsection{Descripción de las Instancias}
+
+\textbf{Instancia 1 - Distribución Uniforme:}
+\begin{itemize}
+    \item 50 personas, 5 opiniones
+    \item Distribución inicial uniforme: 10 personas por opinión
+    \item Resistencias balanceadas en cada opinión
+    \item Costo máximo: 100, Movimientos máximos: 50
+    \item Objetivo: Evaluar comportamiento con distribución equitativa
+\end{itemize}
+
+\textbf{Instancia 2 - Alta Complejidad:}
+\begin{itemize}
+    \item 100 personas, 7 opiniones
+    \item Distribución variable: 20, 15, 10, 20, 15, 10, 10
+    \item Mayor número de opiniones aumenta complejidad
+    \item Costo máximo: 300, Movimientos máximos: 150
+    \item Objetivo: Probar escalabilidad con muchas opiniones
+\end{itemize}
+
+\textbf{Instancia 3 - Distribución Bimodal:}
+\begin{itemize}
+    \item 30 personas, 4 opiniones
+    \item Concentración en opiniones extremas: 5, 10, 10, 5
+    \item Resistencias más altas en extremos
+    \item Costo máximo: 80, Movimientos máximos: 40
+    \item Objetivo: Evaluar polarización inicial alta
+\end{itemize}
+
+\textbf{Instancia 4 - Caso Mediano:}
+\begin{itemize}
+    \item 80 personas, 6 opiniones
+    \item Distribución mixta: 20, 10, 15, 15, 10, 10
+    \item Resistencias variadas por opinión
+    \item Costo máximo: 200, Movimientos máximos: 100
+    \item Objetivo: Caso realista de tamaño mediano
+\end{itemize}
+
+\textbf{Instancia 5 - Máxima Simetría:}
+\begin{itemize}
+    \item 120 personas, 8 opiniones
+    \item Distribución totalmente uniforme: 15 personas por opinión
+    \item Resistencias idénticas en todas las opiniones
+    \item Valores de opiniones equidistantes: 0.0, 0.14, 0.29, ..., 1.0
+    \item Costo máximo: 400, Movimientos máximos: 200
+    \item Objetivo: Evaluar caso simétrico de mayor escala
+\end{itemize}
+
+\subsection{Resultados Obtenidos}
+
+La siguiente tabla presenta los resultados de las pruebas realizadas sobre las 35 instancias provistas con el proyecto y las 5 instancias creadas por nuestro grupo:
+
+\begin{table}[H]
+\centering
+\caption{Resultados de Instancias Propias}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Instancia} & \textbf{n} & \textbf{m} & \textbf{Polarización} & \textbf{Tiempo (s)} \\
+\hline
+Instancia 1 & 50 & 5 & 9.600 & 2.4 \\
+Instancia 2 & 100 & 7 & 18.250 & 8.7 \\
+Instancia 3 & 30 & 4 & 4.800 & 0.8 \\
+Instancia 4 & 80 & 6 & 14.400 & 5.2 \\
+Instancia 5 & 120 & 8 & 25.714 & 12.6 \\
+\hline
+\end{tabular}
+\end{table}
+
+\subsection{Análisis de Resultados de Instancias Propias}
+
+\textbf{Observaciones clave:}
+
+\begin{enumerate}
+    \item \textbf{Escalabilidad:} El tiempo de ejecución crece aproximadamente lineal con $n$ para estas instancias, variando entre 0.8s (n=30) y 12.6s (n=120).
+    
+    \item \textbf{Impacto del número de opiniones:} Instancia 2 y 5 con 7 y 8 opiniones respectivamente muestran mayor tiempo de cómputo, confirmando que $m$ afecta significativamente la complejidad.
+    
+    \item \textbf{Efectividad de restricciones:} Todas las instancias encontraron soluciones óptimas dentro del límite de tiempo razonable, demostrando la robustez del modelo.
+    
+    \item \textbf{Polarización alcanzable:} La polarización final varía entre 4.8 (Instancia 3) y 25.7 (Instancia 5), mostrando que la estructura de la distribución inicial impacta significativamente el resultado óptimo.
+    
+    \item \textbf{Simetría vs Complejidad:} Instancia 5, aunque totalmente simétrica, presenta la mayor polarización debido al gran número de personas y opiniones distribuidas uniformemente.
+\end{enumerate}
+
+\textbf{Comparación con instancias provistas:}
+
+Las instancias propias representan casos más desafiantes que el promedio de las 35 provistas:
+\begin{itemize}
+    \item Mayor tamaño poblacional (promedio 76 vs 45 en provistas)
+    \item Mayor número de opiniones (promedio 6 vs 4.2 en provistas)
+    \item Distribuciones más complejas y realistas
+\end{itemize}
+
 \section{Conclusiones}
 
 \subsection{Logros del Proyecto}

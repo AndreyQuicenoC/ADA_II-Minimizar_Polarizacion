@@ -15,27 +15,29 @@ from tkinter import ttk
 class GUIStyles:
     """Clase que contiene todos los estilos visuales de la GUI"""
     
-    # ===== PALETA DE COLORES MODERNA - TEMA PÚRPURA/AZUL =====
+    # ===== PALETA DE COLORES MODERNA - TEMA CYAN/AZUL OSCURO =====
     COLORS = {
-        'bg_dark': '#0d1117',           # Fondo principal muy oscuro (GitHub dark)
-        'bg_medium': '#161b22',         # Fondo medio
-        'bg_light': '#21262d',          # Fondo claro
-        'accent': '#8b5cf6',            # Púrpura acento (violeta moderno)
-        'accent_hover': '#a78bfa',      # Púrpura acento hover
-        'accent_dark': '#6d28d9',       # Púrpura oscuro
-        'button': '#7c3aed',            # Púrpura botones
-        'button_hover': '#8b5cf6',      # Púrpura botones hover
-        'text': '#f0f6fc',              # Texto claro
-        'text_secondary': '#8b949e',    # Texto secundario
-        'border': '#30363d',            # Bordes
-        'border_active': '#8b5cf6',     # Bordes activos
-        'error': '#f85149',             # Rojo error
-        'success': '#3fb950',           # Verde éxito
-        'warning': '#d29922',           # Amarillo advertencia
-        'info': '#58a6ff',              # Azul info
-        'frame_bg': '#161b22',          # Fondo de frames
-        'card_bg': '#0d1117',           # Fondo de tarjetas
-        'input_bg': '#0d1117',          # Fondo inputs
+        'bg_dark': '#0a0e27',           # Fondo principal azul muy oscuro
+        'bg_medium': '#0f172a',         # Fondo medio azul oscuro
+        'bg_light': '#1e293b',          # Fondo más claro
+        'accent': '#06b6d4',            # Cyan brillante (principal)
+        'accent_hover': '#22d3ee',      # Cyan claro hover
+        'accent_dark': '#0891b2',       # Cyan oscuro
+        'button': '#0e7490',            # Cyan botones
+        'button_hover': '#06b6d4',      # Cyan botones hover
+        'text': '#f1f5f9',              # Texto muy claro
+        'text_secondary': '#94a3b8',    # Texto secundario
+        'border': '#334155',            # Bordes
+        'border_active': '#06b6d4',     # Bordes activos
+        'error': '#ef4444',             # Rojo error
+        'success': '#10b981',           # Verde éxito
+        'warning': '#f59e0b',           # Naranja advertencia
+        'info': '#3b82f6',              # Azul info
+        'frame_bg': '#0f172a',          # Fondo de frames
+        'card_bg': '#1e293b',           # Fondo de tarjetas (más claro)
+        'input_bg': '#0f172a',          # Fondo inputs
+        'white': '#ffffff',             # Blanco puro
+        'output_bg': '#1e293b',         # Fondo de output
     }
     
     # ===== FUENTES =====

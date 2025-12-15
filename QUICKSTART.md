@@ -3,22 +3,26 @@
 ## Para Usuarios Nuevos (Instalación desde Cero)
 
 ### Paso 1: Clonar el Repositorio
+
 ```bash
 git clone https://github.com/AndreyQuicenoC/ADA_II-Minimizar_Polarizacion.git
 cd ADA_II-Minimizar_Polarizacion
 ```
 
 ### Paso 2: Instalar Python
+
 - Descargar Python 3.8 o superior desde: https://www.python.org/
 - Durante la instalación, **marcar "Add Python to PATH"**
 - Verificar: `python --version`
 
 ### Paso 3: Instalar Dependencias de Python
+
 ```bash
 pip install -r requirements.txt
 ```
 
 ### Paso 4: Instalar MiniZinc (⚠️ OBLIGATORIO)
+
 1. Ir a: https://www.minizinc.org/
 2. Descargar el instalador para Windows
 3. Ejecutar el instalador
@@ -26,7 +30,9 @@ pip install -r requirements.txt
 5. Reiniciar la computadora
 
 ### Paso 5: Verificar Instalación de MiniZinc
+
 Abrir una terminal NUEVA (después de reiniciar) y ejecutar:
+
 ```bash
 minizinc --version
 ```
@@ -35,6 +41,7 @@ minizinc --version
 **Si ves un error**: ❌ MiniZinc no está en el PATH. Reinstala marcando la opción "Add to PATH".
 
 ### Paso 6: Ejecutar la Aplicación
+
 ```bash
 python main.py
 ```
@@ -42,7 +49,9 @@ python main.py
 ## Problemas Comunes
 
 ### "MiniZinc no está instalado o no está en el PATH"
+
 **Solución:**
+
 1. Verifica que MiniZinc esté instalado
 2. Abre una terminal NUEVA (PowerShell o CMD)
 3. Ejecuta: `minizinc --version`
@@ -53,12 +62,16 @@ python main.py
    - Prueba de nuevo en una terminal nueva
 
 ### "python: command not found"
+
 **Solución:**
+
 - Reinstala Python marcando "Add Python to PATH"
 - Reinicia la terminal
 
 ### La GUI no se abre
+
 **Solución:**
+
 - Verifica que Python esté instalado: `python --version`
 - Asegúrate de estar en el directorio del proyecto
 - Intenta: `python main.py`
@@ -95,10 +108,12 @@ Esto ejecutará las 35 pruebas y comparará con los resultados esperados.
 ## Soporte
 
 Para problemas o preguntas:
+
 - Revisa el README.md principal
 - Consulta la documentación en docs/
 - Abre un issue en GitHub
 
 ---
+
 **Autores**: Andrey Quiceño, Iván, Francesco, Jonathan  
 **Universidad del Valle** - Análisis de Algoritmos II - 2025

@@ -6,9 +6,9 @@ Este proyecto implementa un modelo de optimización para minimizar la polarizaci
 
 ## Autores
 
-- Andrey 
+- Andrey
 - Iván
-- Francesco  
+- Francesco
 - Jonathan
 
 **Universidad del Valle** - Análisis de Algoritmos II  
@@ -90,12 +90,14 @@ pip install -r requirements.txt
 **⚠️ IMPORTANTE**: MiniZinc es OBLIGATORIO para que el proyecto funcione.
 
 #### Windows:
+
 1. Descargar desde: https://www.minizinc.org/
 2. Ejecutar el instalador
 3. **Marcar la opción "Add MiniZinc to PATH"** durante la instalación
 4. Reiniciar la computadora
 
 #### Verificar instalación:
+
 ```bash
 minizinc --version
 ```
@@ -103,6 +105,7 @@ minizinc --version
 Deberías ver algo como: `MiniZinc to FlatZinc converter, version 2.x.x`
 
 Si ves un error como `'minizinc' is not recognized`, significa que:
+
 - MiniZinc no está instalado, O
 - No está en el PATH del sistema
 
@@ -131,6 +134,7 @@ python scripts/run_tests.py
 ```
 
 Este script:
+
 - Ejecuta las 35 pruebas automáticamente
 - Compara con resultados esperados
 - Muestra estadísticas de éxito/fallo

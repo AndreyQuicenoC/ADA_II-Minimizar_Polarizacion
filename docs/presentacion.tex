@@ -1,0 +1,260 @@
+\documentclass[aspectratio=169]{beamer}
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning}
+
+% Tema moderno con colores cyan/azul oscuro
+\usetheme{Madrid}
+\usecolortheme{default}
+
+% Definir colores personalizados
+\definecolor{darkbg}{RGB}{10,14,39}
+\definecolor{mediumbg}{RGB}{15,23,42}
+\definecolor{accent}{RGB}{6,182,212}
+\definecolor{accentlight}{RGB}{34,211,238}
+\definecolor{textcolor}{RGB}{241,245,249}
+
+% Aplicar colores personalizados
+\setbeamercolor{palette primary}{bg=darkbg,fg=textcolor}
+\setbeamercolor{palette secondary}{bg=mediumbg,fg=textcolor}
+\setbeamercolor{palette tertiary}{bg=accent,fg=white}
+\setbeamercolor{palette quaternary}{bg=accentlight,fg=darkbg}
+\setbeamercolor{structure}{fg=accent}
+\setbeamercolor{title}{fg=accent}
+\setbeamercolor{frametitle}{fg=accent}
+\setbeamercolor{normal text}{fg=textcolor,bg=darkbg}
+\setbeamercolor{block title}{bg=accent,fg=white}
+\setbeamercolor{block body}{bg=mediumbg,fg=textcolor}
+\setbeamercolor{itemize item}{fg=accent}
+\setbeamercolor{itemize subitem}{fg=accentlight}
+\setbeamercolor{enumerate item}{fg=accent}
+
+% Quitar símbolos de navegación
+\setbeamertemplate{navigation symbols}{}
+
+% Numeración de slides
+\setbeamertemplate{footline}[frame number]
+
+% Título
+\title{Sistema de Minimización de Polarización}
+\subtitle{Optimización mediante Programación Entera Mixta}
+\author{Andrey Quiceño \and Iván \and Francesco \and Jonathan}
+\institute{Universidad del Valle \\ Análisis de Algoritmos II}
+\date{Diciembre 2025}
+
+\begin{document}
+
+% Slide 1: Portada
+\begin{frame}
+\titlepage
+\end{frame}
+
+% Slide 2: Problema y Motivación
+\begin{frame}{El Problema de la Polarización}
+\begin{block}{Contexto}
+\begin{itemize}
+    \item Población con $n$ personas distribuidas en $m$ opiniones
+    \item Cada opinión tiene un valor $v_i \in [0,1]$
+    \item Personas con diferentes niveles de resistencia al cambio
+\end{itemize}
+\end{block}
+
+\begin{block}{Objetivo}
+Minimizar la polarización final mediante movimientos estratégicos entre opiniones, sujeto a:
+\begin{itemize}
+    \item Presupuesto limitado ($c_t$)
+    \item Número máximo de movimientos
+    \item Costos variables según resistencia
+\end{itemize}
+\end{block}
+\end{frame}
+
+% Slide 3: Modelo Matemático
+\begin{frame}{Modelo Matemático}
+\begin{block}{Parámetros}
+\begin{itemize}
+    \item $n$: total de personas, $m$: opiniones
+    \item $p_i$: personas en opinión $i$
+    \item $s_{i,k}$: personas en opinión $i$ con resistencia $k$ ($k=1,2,3$)
+    \item Factores: baja(1.0), media(1.5), alta(2.0)
+\end{itemize}
+\end{block}
+
+\begin{block}{Variables de Decisión}
+$$x_{k,i,j} \geq 0 \quad \forall k \in \{1,2,3\}, i,j \in \{1,\ldots,m\}$$
+Número de personas con resistencia $k$ que se mueven de $i$ a $j$
+\end{block}
+\end{frame}
+
+% Slide 4: Función Objetivo
+\begin{frame}{Función Objetivo y Mediana}
+\begin{block}{Polarización}
+$$\text{Pol}(p',v) = \sum_{i=1}^{m} p'_i \cdot |v_i - \text{mediana}(p',v)|$$
+Donde $p'_i$ es la distribución final de personas
+\end{block}
+
+\begin{block}{Cálculo de Mediana}
+Usando enfoque acumulativo en MiniZinc:
+\begin{itemize}
+    \item Array acumulativo de personas por opinión
+    \item Buscar posición donde se alcanza $\lfloor n/2 \rfloor + 1$
+    \item Si $n$ par: promedio de dos valores centrales
+\end{itemize}
+\end{block}
+\end{frame}
+
+% Slide 5: Restricciones del Modelo
+\begin{frame}{Restricciones del Modelo}
+\begin{enumerate}
+    \item \textbf{Capacidad por resistencia:}
+    $$\sum_{j=1}^{m} x_{k,i,j} \leq s_{i,k} \quad \forall k, i$$
+    
+    \item \textbf{No auto-movimientos:}
+    $$x_{k,i,i} = 0 \quad \forall k, i$$
+    
+    \item \textbf{Conservación de población:}
+    $$p'_i = p_i + \sum_{k,j} (x_{k,j,i} - x_{k,i,j})$$
+    
+    \item \textbf{Costo total:}
+    $$\sum_{k,i,j} r_k \cdot x_{k,i,j} \leq c_t$$
+    
+    \item \textbf{Movimientos máximos:}
+    $$\sum_{k,i,j} x_{k,i,j} \leq \text{maxMovs}$$
+\end{enumerate}
+\end{frame}
+
+% Slide 6: Algoritmo Branch and Bound
+\begin{frame}{Branch and Bound con Gecode}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\textbf{Estrategia de Búsqueda}
+\begin{itemize}
+    \item \textbf{Variable selection}: first\_fail
+    \item \textbf{Value choice}: indomain\_min
+    \item \textbf{Solver}: Gecode
+\end{itemize}
+\end{column}
+\begin{column}{0.5\textwidth}
+\textbf{Proceso}
+\begin{enumerate}
+    \item Exploración del árbol
+    \item Branching en $x_{k,i,j}$
+    \item Podas por restricciones
+    \item Actualización de cota
+    \item Convergencia a óptimo
+\end{enumerate}
+\end{column}
+\end{columns}
+
+\vspace{0.5cm}
+\begin{block}{Resultado}
+Solución óptima garantizada con polarización mínima
+\end{block}
+\end{frame}
+
+% Slide 7: Implementación
+\begin{frame}{Arquitectura del Sistema}
+\begin{columns}
+\begin{column}{0.5\textwidth}
+\textbf{Componentes}
+\begin{itemize}
+    \item \texttt{model/Proyecto.mzn}: Modelo MiniZinc
+    \item \texttt{input\_output/}: Parser I/O
+    \item \texttt{gui.py}: Interfaz gráfica
+    \item \texttt{scripts/}: Testing y build
+\end{itemize}
+\end{column}
+\begin{column}{0.5\textwidth}
+\textbf{Tecnologías}
+\begin{itemize}
+    \item MiniZinc 2.6+
+    \item Python 3.8+
+    \item Tkinter (GUI)
+    \item PyInstaller (.exe)
+\end{itemize}
+\end{column}
+\end{columns}
+
+\vspace{0.5cm}
+\begin{block}{Flujo}
+Archivo .txt $\rightarrow$ Parser $\rightarrow$ .dzn $\rightarrow$ MiniZinc $\rightarrow$ Resultado $\rightarrow$ GUI
+\end{block}
+\end{frame}
+
+% Slide 8: Resultados y Pruebas
+\begin{frame}{Validación y Resultados}
+\begin{block}{Batería de Pruebas}
+\begin{itemize}
+    \item 35 casos de prueba
+    \item Rangos: $n \in [10, 100]$, $m \in [3, 5]$
+    \item Validación automática contra resultados esperados
+    \item Tolerancia: 0.001
+\end{itemize}
+\end{block}
+
+\begin{block}{Desempeño}
+\begin{itemize}
+    \item Casos pequeños ($n \leq 20$): $< 1$ segundo
+    \item Casos medianos ($20 < n \leq 50$): 1-10 segundos
+    \item Casos grandes ($n > 50$): 10-60 segundos
+    \item Timeout configurado: 5 minutos
+\end{itemize}
+\end{block}
+\end{frame}
+
+% Slide 9: Demo de la Interfaz
+\begin{frame}{Interfaz Gráfica}
+\begin{block}{Características}
+\begin{itemize}
+    \item Diseño moderno con tema cyan/azul oscuro
+    \item Carga de archivos .txt intuitiva
+    \item Visualización de parámetros
+    \item Ejecución asíncrona (no bloquea UI)
+    \item Resultados con formato profesional
+    \item Exportación a archivos
+\end{itemize}
+\end{block}
+
+\begin{block}{Uso}
+\begin{enumerate}
+    \item Seleccionar archivo de entrada
+    \item Cargar y visualizar datos
+    \item Ejecutar optimización
+    \item Revisar polarización y movimientos
+    \item Guardar resultado
+\end{enumerate}
+\end{block}
+\end{frame}
+
+% Slide 10: Conclusiones
+\begin{frame}{Conclusiones y Trabajo Futuro}
+\begin{block}{Logros}
+\begin{itemize}
+    \item[$\checkmark$] Modelo completo y funcional en MiniZinc
+    \item[$\checkmark$] Implementación robusta con manejo de errores
+    \item[$\checkmark$] Interfaz profesional y amigable
+    \item[$\checkmark$] 35 pruebas validadas exitosamente
+    \item[$\checkmark$] Ejecutable portable para Windows
+\end{itemize}
+\end{block}
+
+\begin{block}{Extensiones Posibles}
+\begin{itemize}
+    \item Análisis de sensibilidad de parámetros
+    \item Optimización multiobjetivo
+    \item Visualización gráfica de resultados
+    \item Modelos de predicción temporal
+\end{itemize}
+\end{block}
+
+\vspace{0.3cm}
+\centering
+\large \textbf{¿Preguntas?}
+\end{frame}
+
+\end{document}

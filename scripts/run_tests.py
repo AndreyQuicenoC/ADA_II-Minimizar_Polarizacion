@@ -53,22 +53,22 @@ def print_subheader(text: str):
 
 def print_success(text: str):
     """Imprime mensaje de éxito."""
-    print(f"{Colors.OKGREEN}✓ {text}{Colors.ENDC}")
+    print(f"{Colors.OKGREEN}[+] {text}{Colors.ENDC}")
 
 
 def print_error(text: str):
     """Imprime mensaje de error."""
-    print(f"{Colors.FAIL}✗ {text}{Colors.ENDC}")
+    print(f"{Colors.FAIL}[-] {text}{Colors.ENDC}")
 
 
 def print_warning(text: str):
     """Imprime mensaje de advertencia."""
-    print(f"{Colors.WARNING}⚠ {text}{Colors.ENDC}")
+    print(f"{Colors.WARNING}[!] {text}{Colors.ENDC}")
 
 
 def print_info(text: str):
     """Imprime mensaje informativo."""
-    print(f"{Colors.OKBLUE}ℹ {text}{Colors.ENDC}")
+    print(f"{Colors.OKBLUE}[i] {text}{Colors.ENDC}")
 
 
 def load_expected_results(results_file: Path) -> Dict[int, float]:

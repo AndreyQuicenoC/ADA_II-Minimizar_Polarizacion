@@ -1,4 +1,5 @@
 # Guion de Sustentación del Proyecto
+
 ## Sistema de Minimización de Polarización
 
 **Equipo:** Andrey Quiceño, Iván, Francesco, Jonathan  
@@ -10,6 +11,7 @@
 ## 1. INTRODUCCIÓN Y MODELO (Andrey - 4 minutos)
 
 ### Preparación
+
 - Tener abierto el archivo `informe.pdf` en la sección del modelo
 - Tener una diapositiva o pizarra con las ecuaciones principales
 - Tener listo el ejemplo de la sección 2.4 del enunciado
@@ -33,26 +35,26 @@
 > - **n**: número total de personas
 > - **m**: número de opiniones posibles
 > - **p_i**: distribución inicial de personas por opinión
-> - **s_{i,k}**: personas con opinión i y nivel de resistencia k (bajo, medio, alto)
+> - **s\_{i,k}**: personas con opinión i y nivel de resistencia k (bajo, medio, alto)
 > - **v_i**: valores de las opiniones en el rango [0,1]
 > - **ct**: costo total máximo permitido
 > - **maxMovs**: movimientos máximos permitidos
 >
-> Las variables de decisión son x_{k,i,j}: el número de personas con resistencia k que movemos de la opinión i a la opinión j."
+> Las variables de decisión son x\_{k,i,j}: el número de personas con resistencia k que movemos de la opinión i a la opinión j."
 
 **[2:30 - 3:30] Restricciones y Función Objetivo**
 
 > "Las restricciones principales son:
 >
 > 1. **Capacidad**: No podemos mover más personas de las que hay con cada nivel de resistencia
-> 2. **No auto-movimientos**: x_{k,i,i} = 0
+> 2. **No auto-movimientos**: x\_{k,i,i} = 0
 > 3. **Conservación**: El número total de personas se mantiene constante
 > 4. **Costo**: La suma de costos no excede ct, donde el costo de mover x personas es x × distancia × factor de resistencia
 > 5. **Movimientos**: La cantidad total de movimientos no excede maxMovs
 >
 > La función objetivo minimiza la polarización, calculada como:
 >
-> **Pol(p',v) = Σ p'_i × |v_i - mediana(p',v)|**
+> **Pol(p',v) = Σ p'\_i × |v_i - mediana(p',v)|**
 >
 > Es decir, la suma ponderada de las distancias de cada opinión respecto a la mediana."
 
@@ -65,6 +67,7 @@
 ## 2. IMPLEMENTACIÓN EN MINIZINC (Iván - 4 minutos)
 
 ### Preparación
+
 - Tener abierto `Proyecto.mzn` en el editor
 - Tener una terminal lista para ejecutar MiniZinc
 - Tener preparado el archivo `tests/Prueba1.txt`
@@ -104,6 +107,7 @@
 > "Veamos cómo funciona con un caso real:
 >
 > [EN TERMINAL]
+>
 > ```
 > minizinc --solver Gecode Proyecto.mzn tests/Prueba1.dzn
 > ```
@@ -117,6 +121,7 @@
 ## 3. PRUEBAS Y BRANCH AND BOUND (Francesco - 4 minutos)
 
 ### Preparación
+
 - Tener abierto MiniZinc IDE con Gecode Gist
 - Tener terminal con `python scripts/run_tests.py` listo
 - Tener capturas de árboles de búsqueda preparadas
@@ -128,6 +133,7 @@
 > "Para validar nuestro modelo, creamos una batería de 35 pruebas que cubren casos pequeños, medianos y grandes:
 >
 > [EJECUTAR EN TERMINAL]
+>
 > ```
 > python scripts/run_tests.py
 > ```
@@ -135,6 +141,7 @@
 > [MIENTRAS CORRE, EXPLICAR]
 >
 > El script automáticamente:
+>
 > - Convierte cada .txt a .dzn
 > - Ejecuta MiniZinc
 > - Compara con resultados esperados
@@ -148,7 +155,7 @@
 
 > "El solver Gecode usa Branch and Bound para encontrar la solución óptima:
 >
-> **Branching**: En cada nodo, el solver elige una variable x_{k,i,j} aún sin asignar y divide en dos casos: asignar un valor específico o no asignarlo.
+> **Branching**: En cada nodo, el solver elige una variable x\_{k,i,j} aún sin asignar y divide en dos casos: asignar un valor específico o no asignarlo.
 >
 > **Bounding**: Se calcula una cota inferior de la polarización basándose en las asignaciones parciales. Si esta cota es peor que la mejor solución conocida, se poda la rama.
 >
@@ -160,9 +167,7 @@
 
 > "Usemos el visualizador de MiniZinc para ver el árbol de búsqueda:
 >
-> [ABRIR MiniZinc IDE]
-> [Solver → Gecode (Gist)]
-> [Run con Prueba1.dzn]
+> [ABRIR MiniZinc IDE] > [Solver → Gecode (Gist)] > [Run con Prueba1.dzn]
 >
 > [EXPLICAR ÁRBOL]
 >
@@ -190,6 +195,7 @@
 ## 4. INTERFAZ GRÁFICA Y CONCLUSIONES (Jonathan - 3 minutos)
 
 ### Preparación
+
 - Tener la GUI cerrada, lista para ejecutar `python main.py`
 - Tener `tests/Prueba5.txt` seleccionado
 - Tener preparado un lugar para guardar el resultado
@@ -201,6 +207,7 @@
 > "Además del modelo, desarrollamos una interfaz gráfica profesional para facilitar el uso del sistema:
 >
 > [EJECUTAR]
+>
 > ```
 > python main.py
 > ```
@@ -213,20 +220,15 @@
 
 > "Veamos el flujo completo:
 >
-> **1. Seleccionar archivo:**
-> [CLICK en 'Seleccionar archivo...']
-> [NAVEGAR a tests/Prueba5.txt]
-> [ABRIR]
+> **1. Seleccionar archivo:** > [CLICK en 'Seleccionar archivo...'] > [NAVEGAR a tests/Prueba5.txt] > [ABRIR]
 >
-> **2. Cargar datos:**
-> [CLICK en 'Cargar datos']
+> **2. Cargar datos:** > [CLICK en 'Cargar datos']
 >
 > Como ven, automáticamente parsea el archivo, valida los datos y muestra los parámetros principales: n=10, m=3, costo máximo=25, movimientos=5.
 >
 > En el panel de salida vemos la distribución inicial y las resistencias por opinión.
 >
-> **3. Ejecutar modelo:**
-> [CLICK en 'Ejecutar MiniZinc']
+> **3. Ejecutar modelo:** > [CLICK en 'Ejecutar MiniZinc']
 >
 > [MIENTRAS EJECUTA]
 >
@@ -235,13 +237,12 @@
 > [CUANDO TERMINA]
 >
 > ¡Perfecto! Obtuvimos una polarización de 0.000 en 1.2 segundos. La interfaz muestra:
+>
 > - La polarización final
 > - La distribución final de personas
 > - Las tres matrices de movimientos (una por nivel de resistencia)
 >
-> **4. Guardar resultado:**
-> [CLICK en 'Guardar resultado']
-> [GUARDAR como 'resultado_prueba5.txt']
+> **4. Guardar resultado:** > [CLICK en 'Guardar resultado'] > [GUARDAR como 'resultado_prueba5.txt']
 >
 > El archivo de salida sigue exactamente el formato especificado en el enunciado."
 
@@ -271,11 +272,13 @@
 > ✓ Está completamente documentado con código limpio y modular
 >
 > **Aprendizajes clave:**
+>
 > - La importancia de modelar correctamente las restricciones
 > - Cómo calcular la mediana en programación entera
 > - La efectividad del Branch and Bound con buenas cotas
 >
 > **Trabajo futuro:**
+>
 > - Algoritmos aproximados para casos muy grandes
 > - Visualización gráfica de distribuciones
 > - Análisis de sensibilidad de parámetros
@@ -287,6 +290,7 @@
 ## Notas Adicionales para Todos los Presentadores
 
 ### Antes de la Presentación
+
 - [ ] Probar que MiniZinc esté instalado y funcione
 - [ ] Verificar que todos los archivos estén en sus lugares
 - [ ] Practicar las transiciones entre presentadores
@@ -294,6 +298,7 @@
 - [ ] Verificar que la cámara/audio funcionen correctamente
 
 ### Durante la Presentación
+
 - Hablar claro y a buen ritmo (no muy rápido)
 - Hacer pausas después de conceptos importantes
 - Señalar en pantalla lo que se está explicando
@@ -301,13 +306,16 @@
 - Si algo no funciona, tener plan B (capturas/videos pregrabados)
 
 ### Distribución del Tiempo
+
 - Introducción y Modelo (Andrey): 0:00 - 4:00
 - MiniZinc (Iván): 4:00 - 8:00
 - Pruebas y B&B (Francesco): 8:00 - 12:00
 - GUI y Conclusiones (Jonathan): 12:00 - 15:00
 
 ### Preparación de Archivos
+
 Asegurarse de tener abierto/listo:
+
 1. `Proyecto.mzn` en un editor de texto
 2. Terminal en el directorio del proyecto
 3. MiniZinc IDE con Gecode Gist configurado
@@ -317,13 +325,17 @@ Asegurarse de tener abierto/listo:
 ### Preguntas Frecuentes Anticipadas
 
 **P: ¿Por qué usar programación entera y no otro enfoque?**
+
 > R: El problema es inherentemente discreto (no podemos mover fracciones de personas) y requiere optimización exacta. Programación entera mixta es el enfoque natural.
 
 **P: ¿Qué pasa si no hay solución factible?**
+
 > R: MiniZinc reportará "UNSATISFIABLE". Esto puede pasar si las restricciones son muy estrictas (e.g., costo muy bajo).
 
 **P: ¿Cómo escala con instancias grandes?**
+
 > R: El tiempo crece exponencialmente, pero las restricciones efectivas permiten resolver casos con n~100 en tiempos razonables (~1 minuto).
 
 **P: ¿Se podría paralelizar?**
+
 > R: Gecode soporta búsqueda paralela, pero no lo habilitamos en este proyecto. Sería una mejora futura.

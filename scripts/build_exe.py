@@ -141,10 +141,27 @@ def main():
     
     # Verificar que PyInstaller esté instalado
     try:
-        subprocess.run(['pyinstaller', '--version'], capture_output=True, check=True)
-    except (subprocess.CalledProcessError, FileNotFoundError):
-        print("\n❌ Error: PyInstaller no está instalado")
+        result = subprocess.run(
+            [sys.executable, '-m', 'PyInstaller', '--version'],
+            capture_output=True,
+            text=True,
+            check=False
+        )
+        if result.returncode != 0:
+            # Intentar con comando directo
+            result = subprocess.run(
+                ['pyinstaller', '--version'],
+                capture_output=True,
+                text=True,
+                check=False
+            )
+            if result.returncode != 0:
+                raise FileNotFoundError("PyInstaller not available")
+        print(f"\n✓ PyInstaller detectado: {result.stdout.strip()}")
+    except (FileNotFoundError, Exception) as e:
+        print("\n❌ Error: PyInstaller no está instalado o no se puede ejecutar")
         print("Instala con: pip install pyinstaller")
+        print(f"Detalles: {e}")
         return 1
     
     # Limpiar builds anteriores

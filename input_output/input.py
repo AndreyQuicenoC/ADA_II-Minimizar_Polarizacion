@@ -153,11 +153,12 @@ def generate_dzn_file(params: Dict, output_path: str):
         f.write(f"v = [{v_str}];\n\n")
         
         # Matriz s (m x 3)
+        # Formato MiniZinc: usar | para separar filas
         f.write(f"s = [|\n")
         for i, resistances in enumerate(s):
             f.write(f"  {', '.join(map(str, resistances))}")
             if i < len(s) - 1:
-                f.write(",\n")
+                f.write(" |\n")  # pipe para separar filas
             else:
                 f.write("\n")
         f.write(f"|];\n\n")

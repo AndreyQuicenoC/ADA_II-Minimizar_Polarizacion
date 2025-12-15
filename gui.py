@@ -250,22 +250,25 @@ class PolarizationGUI:
         )
         output_frame.pack(fill='both', expand=True)
         
-        # Text widget para mostrar salida
+        # Text widget para mostrar salida con fondo oscuro
         self.output_text = scrolledtext.ScrolledText(
             output_frame,
             wrap=tk.WORD,
             font=GUIStyles.FONTS['mono'],
-            bg=GUIStyles.COLORS['input_bg'],
+            bg=GUIStyles.COLORS['output_bg'],
             fg=GUIStyles.COLORS['text'],
-            insertbackground=GUIStyles.COLORS['text'],
+            insertbackground=GUIStyles.COLORS['accent'],
             selectbackground=GUIStyles.COLORS['accent'],
-            selectforeground='white',
+            selectforeground=GUIStyles.COLORS['white'],
             width=GUIStyles.DIMENSIONS['text_width'],
             height=GUIStyles.DIMENSIONS['text_height'],
             relief='flat',
-            borderwidth=0
+            borderwidth=2,
+            highlightthickness=1,
+            highlightbackground=GUIStyles.COLORS['border'],
+            highlightcolor=GUIStyles.COLORS['accent']
         )
-        self.output_text.pack(fill='both', expand=True)
+        self.output_text.pack(fill='both', expand=True, padx=2, pady=2)
         
         # Configurar tags para colores
         self.output_text.tag_config('success', foreground=GUIStyles.COLORS['success'], font=GUIStyles.FONTS['mono_bold'])
@@ -571,8 +574,24 @@ def main():
     """Función principal"""
     root = tk.Tk()
     app = PolarizationGUI(root)
-    root.mainloop()
+    
+    # Manejar el cierre de la ventana apropiadamente
+    def on_closing():
+        """Maneja el cierre de la ventana"""
+        try:
+            root.quit()
+            root.destroy()
+        except:
+            pass
+    
+    root.protocol("WM_DELETE_WINDOW", on_closing)
+    
+    try:
+        root.mainloop()
+    except KeyboardInterrupt:
+        on_closing()
 
 
 if __name__ == "__main__":
+    main()if __name__ == "__main__":
     main()

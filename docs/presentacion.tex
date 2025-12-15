@@ -99,11 +99,13 @@ Donde $p'_i$ es la distribución final de personas
 \end{block}
 
 \begin{block}{Cálculo de Mediana}
-Usando enfoque acumulativo en MiniZinc:
+Enfoque acumulativo con restricciones:
 \begin{itemize}
-    \item Array acumulativo de personas por opinión
-    \item Buscar posición donde se alcanza $\lfloor n/2 \rfloor + 1$
-    \item Si $n$ par: promedio de dos valores centrales
+    \item $cum_1 = p'_1$
+    \item $cum_i = cum_{i-1} + p'_i$ para $i \geq 2$
+    \item Posición mediana: $median\_pos = \lfloor (n+1)/2 \rfloor$
+    \item $median\_opinion$: primera opinión donde $cum_i \geq median\_pos$
+    \item $median\_value = v_{median\_opinion}$
 \end{itemize}
 \end{block}
 \end{frame}

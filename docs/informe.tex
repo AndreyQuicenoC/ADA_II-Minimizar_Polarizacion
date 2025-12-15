@@ -152,17 +152,36 @@ El objetivo es:
 
 \subsection{Cálculo de la Mediana}
 
-Para calcular la mediana, utilizamos variables auxiliares que representan el acumulado de personas:
+Para calcular la mediana en el modelo de optimización, utilizamos un enfoque basado en variables auxiliares acumulativas.
 
+\textbf{Variables auxiliares:}
 \begin{equation}
-    cum_i = \sum_{j=1}^{i} p'_j
+    cum_i = \sum_{j=1}^{i} p'_j \quad \forall i \in \{1,\ldots,m\}
 \end{equation}
 
-La posición de la mediana depende de si $n$ es par o impar:
-\begin{itemize}
-    \item Si $n$ es impar: posición $= \lceil n/2 \rceil$
-    \item Si $n$ es par: promedio de posiciones $n/2$ y $(n/2)+1$
-\end{itemize}
+Estas variables se definen mediante restricciones recursivas:
+\begin{align}
+    cum_1 &= p'_1 \\
+    cum_i &= cum_{i-1} + p'_i \quad \forall i \in \{2,\ldots,m\}
+\end{align}
+
+\textbf{Posición de la mediana:}
+Calculamos la posición central como:
+\begin{equation}
+    median\_pos = \left\lfloor \frac{n+1}{2} \right\rfloor
+\end{equation}
+
+\textbf{Determinación de la opinión mediana:}
+La variable $median\_opinion$ representa la opinión donde cae el valor mediano, determinada por:
+\begin{align}
+    cum_{median\_opinion} &\geq median\_pos \\
+    cum_i &< median\_pos \quad \forall i < median\_opinion
+\end{align}
+
+Finalmente, el valor de la mediana es:
+\begin{equation}
+    median\_value = v_{median\_opinion}
+\end{equation}
 
 \section{Implementación en MiniZinc}
 

@@ -1,0 +1,14 @@
+# Dependencias del Sistema de Minimización de Polarización
+
+# Python standard library only - no external dependencies required for basic functionality
+# The application uses only built-in Python modules:
+# - tkinter (included with Python)
+# - subprocess
+# - threading
+# - pathlib
+# - typing
+# - re
+
+# External requirement (not Python):
+# - MiniZinc 2.6+ must be installed and available in system PATH
+#   Download from: https://www.minizinc.org/

@@ -330,7 +330,7 @@ def main():
     # Rutas
     tests_dir = ROOT_DIR / 'tests'
     results_file = tests_dir / 'resultados.txt'
-    mzn_file = ROOT_DIR / 'Proyecto.mzn'
+    mzn_file = ROOT_DIR / 'model' / 'Proyecto.mzn'
     temp_dir = ROOT_DIR / 'temp'
     
     # Crear directorio temporal

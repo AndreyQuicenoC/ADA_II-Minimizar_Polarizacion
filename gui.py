@@ -386,13 +386,45 @@ class PolarizationGUI:
         self.root.after(0, lambda: self.update_status(GUIMessages.STATUS_RUNNING))
         
         try:
+            # Verificar que MiniZinc esté instalado
+            try:
+                check_result = subprocess.run(
+                    ['minizinc', '--version'],
+                    capture_output=True,
+                    text=True,
+                    timeout=5
+                )
+                if check_result.returncode != 0:
+                    raise FileNotFoundError("MiniZinc no responde correctamente")
+            except (FileNotFoundError, subprocess.TimeoutExpired) as e:
+                error_msg = (
+                    "❌ MiniZinc no está instalado o no está en el PATH del sistema.\n\n"
+                    "Por favor, sigue estos pasos:\n\n"
+                    "1. Descarga MiniZinc desde: https://www.minizinc.org/\n"
+                    "2. Instala MiniZinc en tu sistema\n"
+                    "3. Asegúrate de marcar la opción 'Add to PATH' durante la instalación\n"
+                    "4. Reinicia VS Code o tu terminal\n"
+                    "5. Verifica la instalación ejecutando: minizinc --version\n\n"
+                    "Si ya instalaste MiniZinc, es posible que necesites:\n"
+                    "- Reiniciar tu computadora para que el PATH se actualice\n"
+                    "- Agregar manualmente el directorio de MiniZinc al PATH del sistema"
+                )
+                self.root.after(0, lambda msg=error_msg: messagebox.showerror("MiniZinc No Encontrado", msg))
+                return
+            
             # Generar archivo .dzn
             dzn_file = ROOT_DIR / "temp" / "DatosProyecto.dzn"
             dzn_file.parent.mkdir(exist_ok=True)
             txt_to_dzn(self.input_file, str(dzn_file))
             
             # Ejecutar MiniZinc
-            mzn_file = ROOT_DIR / "Proyecto.mzn"
+            mzn_file = ROOT_DIR / "model" / "Proyecto.mzn"
+            
+            # Verificar que el modelo existe
+            if not mzn_file.exists():
+                error_msg = f"El archivo del modelo no existe: {mzn_file}\n\nPor favor, verifica la estructura del proyecto."
+                self.root.after(0, lambda msg=error_msg: messagebox.showerror("Error", msg))
+                return
             
             start_time = time.time()
             
@@ -420,12 +452,10 @@ class PolarizationGUI:
                 error_msg = result.stderr if result.stderr else "Error desconocido"
                 self.root.after(0, lambda: self._display_error(error_msg))
                 
-        except FileNotFoundError:
-            self.root.after(0, lambda: messagebox.showerror("Error", GUIMessages.ERROR_MINIZINC))
         except subprocess.TimeoutExpired:
             self.root.after(0, lambda: messagebox.showerror("Error", GUIMessages.ERROR_TIMEOUT))
         except Exception as e:
-            self.root.after(0, lambda: messagebox.showerror("Error", str(e)))
+            self.root.after(0, lambda: messagebox.showerror("Error", f"Error inesperado: {str(e)}"))
         finally:
             self.is_running = False
             self.execute_btn.config(state='normal')

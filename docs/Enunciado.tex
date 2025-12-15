@@ -1,0 +1,355 @@
+\documentclass[10pt]{article}
+\usepackage[spanish]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage[version=4]{mhchem}
+\usepackage{stmaryrd}
+\usepackage{bbold}
+\usepackage{caption}
+\usepackage{hyperref}
+\hypersetup{colorlinks=true, linkcolor=blue, filecolor=magenta, urlcolor=cyan,}
+\urlstyle{same}
+
+\author{Proyecto de curso\\
+El Problema de Minimizar la Polarización presente en una Población\\
+Análisis de Algoritmos II Escuela de Ingeniería de Sistemas y Computación\\
+Universidad\\
+del Valle\\
+Profesor Jesús Alexander Aranda\\
+Monitor Mauricio Muñoz}
+\date{}
+
+
+%New command to display footnote whose markers will always be hidden
+\let\svthefootnote\thefootnote
+\newcommand\blfootnotetext[1]{%
+  \let\thefootnote\relax\footnote{#1}%
+  \addtocounter{footnote}{-1}%
+  \let\thefootnote\svthefootnote%
+}
+
+%Overriding the \footnotetext command to hide the marker if its value is `0`
+\let\svfootnotetext\footnotetext
+\renewcommand\footnotetext[2][?]{%
+  \if\relax#1\relax%
+    \ifnum\value{footnote}=0\blfootnotetext{#2}\else\svfootnotetext{#2}\fi%
+  \else%
+    \if?#1\ifnum\value{footnote}=0\blfootnotetext{#2}\else\svfootnotetext{#2}\fi%
+    \else\svfootnotetext[#1]{#2}\fi%
+  \fi
+}
+
+\begin{document}
+\maketitle
+\captionsetup{singlelinecheck=false}
+Noviembre de 2025
+
+\section{Introducción}
+El presente proyecto tiene por objeto verificar que los estudiantes han adquirido el siguiente resultado de aprendizaje:
+
+Construye modelos de optimización en términos de parámetros, variables, restricciones y función objetivo, a partir de un problema determinado, para explorar soluciones prácticas utilizando herramientas computacionales de modelamiento y solvers existentes.
+
+Para ello, los estudiantes deben demostrar que logran:
+
+\begin{itemize}
+  \item Utilizar el método branch and bound para resolver problemas de programación binaria, entera y mixta.
+  \item Usa técnicas de programación lineal para modelar/solucionar problemas de programación lineal en terminos de parámetros, variables, restricciones y función objetivo.
+  \item Usa técnicas de programación entera para modelar/solucionar problemas de programación entera en términos de parámetros, variables, restricciones y función objetivo.
+  \item Usa técnicas de programación entera mixta para modelar/solucionar problemas de programación entera mixta en términos de parámetros, variables, restricciones y función objetivo.
+  \item Usa un lenguaje de modelamiento para escribir y probar modelos de programación lineal, entera y entera mixta.
+\end{itemize}
+
+Para ello el estudiante:
+
+\begin{itemize}
+  \item Desarrolla un programa utilizando tecnologías de programación adecuadas para resolver en grupo un proyecto de programación planteado por el profesor.
+  \item Escribe un informe de proyecto, presentando los aspectos más relevantes del desarrollo realizado, para que un lector pueda evaluar el proyecto.
+  \item Desarrolla una presentación digital, con los aspectos más relevantes del desarrollo realizado, para sustentar el trabajo ante los compañeros y el profesor.
+\end{itemize}
+
+\section{El Problema de Minimizar la Polarización presente en una Población: MinPol}
+\subsection{Contexto del problema}
+La polarización, así como el extremismo, es un fenómeno que se presenta cada vez de forma más frecuente en nuestra sociedad, este fenómeno se agudiza cuando las sociedades se tienden a dividir en dos grandes bandos, de tamaños similares, donde la opinión de cada bando es totalmente opuesta a la del otro.
+
+El nivel de polarización presente en una sociedad se puede medir de diversas maneras, una forma de hacerlo es considerando el esfuerzo requerido para llevar a toda la población a un consenso. Donde el consenso se refiere a que todas las personas han alcanzando una opinión común con respecto a un tema. 1
+
+Entendiendo que un alto nivel de polarización, al menos en algunos casos, tiene un potencial efecto corrosivo y perjudicial en el funcionamiento de comunidades, sociedades y democracias, es interesante estudiar estrategias que permitan reducir la polarización. Sin embargo, los esfuerzos para reducir la polarización tienen un costo que puede ser muy alto, por ende la toma de decisiones que se tomen en pro de reducir la polarización constituye un problema bastante relevante y es el tema central de este proyecto.
+
+En este proyecto, partiendo de las opiniones iniciales de una población, se determinará que esfuerzos se harán para cambiar la opinión de algunos con el fin de alcanzar el menor nivel de polarización, entendiendo que los esfuerzos tienen un costo y que este no puede ser más elevado de un umbral definido.
+
+\subsection{El problema}
+El problema de minimizar la polarización en una población consiste en decidir qué esfuerzos se harán para cambiar la opinión de un grupo de personas y hacia donde, teniendo en cuenta que cada esfuerzo cuesta y que hay recursos limitados, de tal forma\\
+que la población termine lo menos polarizada posible.
+
+Por ejemplo, imagine que en una población de tamaño 10, donde tenemos tres posibles opiniones: opinión 1, opinión 2 y opinión 3 ; las opiniones iniciales de la población sobre una propuesta son las siguientes:
+
+\begin{itemize}
+  \item 8 personas comparten la opinión 1 .
+  \item 0 personas comparten la opinión 2 .
+  \item 2 personas comparten la opinión 3 .
+\end{itemize}
+
+Por otro lado, hay que considerar que no todas las personas en cada grupo de opinion son susceptibles a cambiar su opinión. Por ejemplo, algunos pueden tener una resistencia baja y otros una resistencia alta para cambiar su opinión. En ese sentido, se pueden considerar que los primeros son receptivos y los ultimos son de mente cerrada. Para el ejemplo tenemos lo siguiente::
+
+\begin{itemize}
+  \item De 8 personas de la opinión 1,3 tienen una resistencia baja, 3 tienen resistencia media y 2 tienen resistencia alta.
+  \item De 2 personas de la opinión 2 , las dos personas tiene una resistencia media.
+\end{itemize}
+
+En ese sentido, el esfuerzo (o costo) de mover $x$ personas de la opinión $i$ a la opinión $j$ está determinado por la siguiente función:
+
+$$
+x \cdot|i-j| \cdot s
+$$
+
+donde $s$ es $1,1,5$ o 2 dependiendo si las personas tienen una resistencia baja, media o alta respectivamente.
+
+Adicionalmente, el costo máximo permitido de los esfuerzos es 9.
+
+Finalmente, en algunos casos es posible que la cantidad de movimientos de $x$ personas de una opinión $i$ a una opinión $j$ sea limitado, en ese caso los movimientos se calcularán como la distancia entre las opiniones $(|i-j|)$. En este ejemplo la cantidad de movimientos permitidos es 10 .\\
+¿Cuáles serían los esfuerzos o acciones que se harían para lograr minimizar la polarización?
+
+\footnotetext{${ }^{1}$ La polarización es un fenómeno diferente al extremismo, por ejemplo, un grupo de personas que comparta una opinión radical sobre un tema sería extremista, sin embargo, dicho grupo no estaría polarizado ya que todos piensan lo mismo.
+}En este caso, un esfuerzo podría ser el siguiente: mover las dos personas con resistencia media de la opinión 3 a la opinión 1. Este esfuerzo, según la expresión, costaría en total $2 \cdot 2 \cdot 1,5=6$, siendo este costo menor al umbral de 9 . Por otro lado, la cantidad de movimientos realizados es 4 , que es menor al umbral de 10. Como en este caso se alcanza consenso en la opinión 1 , el valor de la polarización alcanzado es 0 . Por lo tanto mover las opiniónes de las dos personas de la opinión 3 a la opinión 1 es una solución del problema.
+
+Sin embargo, ¿Qué ocurre cuando no se alcanza consenso, porque el esfuerzo para ello es superior al umbral permitido? El objetivo sería llegar a una configuración donde la polarización sea mínima. Pero, ¿Cómo se mide en ese caso la polarización? Para medir la polarización en general, incluyendo casos donde no se alcanza consenso, usaremos la siguiente fórmula:
+
+$$
+\operatorname{Pol}(p, v)=\sum_{i=1, \ldots, m} p_{i}\left|v_{i}-\operatorname{mediana}(p, v)\right|
+$$
+
+Donde $m$ es el número de posibles opiniones, $p$ es el vector con la distribución de personas por opinión, $p_{i}$ es el número de personas con opinión $i, v$ es el vector con los valores de todas las opiniones, es decir $v_{i}$ es el valor de la opinión $i$; y mediana( $\mathrm{p}, \mathrm{v}$ ) corresponde al valor de la mediana de los valores de las opiniones de todas las personas que forman la población.
+
+\subsection{Formalización}
+Sea $n \in \mathbb{N}$ el número total de personas. Sea $m \in \mathbb{N}$ el número de opiniones posibles que pueden tener las personas.
+
+Sea $p_{i} \in 0 . . n$ el número de personas que tienen como opinión inicial la opinión $i \in 1 . . m$
+
+Sea $s_{i, k} \in 0 . . p_{i}$ el número de personas que tienen como opinión $i$ y $k$ el nivel de resistencia al cambio. En ese caso, los posibles valores de $k$ son 1,2 y 3 los cuales representan niveles bajos, medios y altos respectivamente.
+
+Sea $v_{i} \in[0,1]$ el valor real correspondiente a la opinión $i \in 1 . . m$
+
+Sea $c t \in \mathbb{R}^{+}$el costo total máximo permitido de todos los esfuerzos.
+
+Sea maxMovs $\in \mathbb{R}^{+}$la cantidad máxima permitida de movimientos.
+
+El problema consiste en decidir qué esfuerzos (donde cada esfuerzo consiste en mover un determinado número de personas de una opinión $i$ a una opinión $j$, teniendo en cuenta la resistencia al cambio) se harán tal que el costo total permitido para todos los esfuerzos no sea superado y que se minimice la polarización de la población.
+
+Naturalmente, el número de personas que se mueven de una opinión a otras, no puede ser mayor que el número de personas que tenían inicialmente esa opinión. En ese sentido, tampoco se pueden mover más personas con un nivel de resistencia determinado inicialmente.
+
+Y obviamente, cada persona tiene una y sólo una opinión, tanto en la distribución original, como en la resultante.
+
+Ahora, ¿cuánto cuesta una solución? El costo de una solución es la suma de los costos de cada movimiento.
+
+El Problema de Minimizar la Polarización presente en una Población
+
+Entrada: $n \in \mathbb{N}, m \in \mathbb{N}, p_{i} \in 0 . . n, s_{i, j} 0 . . p_{i}, v_{i} \in 1 . . m$, ct $\in \mathbb{R}^{+}$y maxMovs $\in \mathbb{R}^{+}$
+
+Salida: $x_{k, i, j} \in \mathbb{N}, i \in 1 . . m, j \in 1 . . m, k \in 1 ., 3$ son el número de personas con nivel de resistencia $k$ que pasarán de tener una opinión $i$ a una opinión $j$. Tal que se minimice la polarización, respetando las restricciones propias del problema. En ese sentido, tambien pueden considerar usar 3 matrices de tamaño $m \times m$, cada una para un nivel de resistencia diferente.
+
+\section{4. ¿Entendimos el problema?}
+Una población formada por 10 personas, considerando 3 posibles diferentes opiniones, se distribuyen como se muestra en el cuadro 1 .
+
+Internamente, la cantidad de personas y sus respectivos niveles de resistencia interno en cada grupo se pueden observar en el cuadro 2.
+
+Los valores de las opiniones se aprecian en el cuadro 3.
+
+El costo total máximo permitido es 25 , y la cantidad de movimientos máximo permitido es 5 .
+
+En este caso la entrada se describiría así:\\
+Entrada: $n=10, m=3, p_{i} \in \mathbb{N}, i \in 1 . . m$ según el cuadro 1, $s_{i, k}$ según el cuadro 2, $c t=25$ y
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+Núm. personas por opinión & Opiniones \\
+\hline
+3 & 1 \\
+3 & 2 \\
+4 & 3 \\
+\hline
+\end{tabular}
+\captionsetup{labelformat=empty}
+\caption{Cuadro 1: Distribución de población por opinión.}
+\end{center}
+\end{table}
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|c|r|r|r|}
+\hline
+Grupo & Resistencia baja & Resistencia media & Resistencia alta \\
+\hline
+op. 1 & 1 & 2 & 0 \\
+\hline
+op. 2 & 0 & 3 & 0 \\
+\hline
+op. 3 & 2 & 1 & 1 \\
+\hline
+\end{tabular}
+\captionsetup{labelformat=empty}
+\caption{Cuadro 2: Cantidad de personas y sus niveles de resistencia al cambio de cada grupo}
+\end{center}
+\end{table}
+
+maxMovs $=5$.\\
+A modo de ejercicio. describa al menos tres salidas diferentes para esta instancia, que cumpla todas las restricciones y calcule su respectiva polarización.\\
+¿Es alguna de ellas una solución óptima? Si no, describa una solución óptima.
+
+\section{El proyecto: Modelamiento e Implementación}
+Usted como ingeniero ha sido contratado para resolver el problema y debe:
+
+\begin{itemize}
+  \item Proponer un modelo genérico para solucionar el problema. El modelo debe ser incluido en formato pdf y debe contener: parámetros, variables, restricciones, función objetivo. El modelo debe utilizar notación formal para que soporte cualquier instancia con la entrada definida en la Sección 3.1.
+  \item Generar 5 instancias para retar a otros proyectos. Para cada instancia debe incluir la entrada y la salida esperada (el valor del óptimo,\\
+o por lo menos el valor de la mejor solución que su grupo haya encontrado)
+  \item Implementar el modelo genérico en MiniZinc (Proyecto.mzn).
+  \item Incluir una tabla con pruebas realizadas sobre las instancias que se proveen con el proyecto y las 5 instancias creadas por su grupo de trabajo. Realice un análisis sobre los resultados obtenidos (incluya el análisis en el informe con el modelo).
+  \item Desarrollar una interfaz gráfica con la tecnología de su predilección que permita configurar o leer una entrada para el problema (la entrada deberá convertirse a formato dzn para poder ser ejecutada por el modelo cumpliendo con las características de la entrada definida en la Sección 3.1 y visualizar la salida. Esta interfaz junto con el modelo sería el entregable para el cliente y será utilizada por algún operario. La interfaz debe incluir un botón que al presionarlo:
+  \item Cree un archivo DatosProyecto.dzn
+\end{itemize}
+
+\begin{table}[h]
+\begin{center}
+\begin{tabular}{|c|c|}
+\hline
+Opiniones & Valor \\
+\hline
+1 & 0.297 \\
+2 & 0.673 \\
+3 & 0.809 \\
+\hline
+\end{tabular}
+\captionsetup{labelformat=empty}
+\caption{Cuadro 3: Valores de las opiniones posibles.}
+\end{center}
+\end{table}
+
+con los datos proporcionados en la interfaz
+
+\begin{itemize}
+  \item Ejecute el modelo genérico Proyecto.mzn sobre los datos proporcionados
+  \item Despliegue los resultados de la solución
+  \item Incluya los archivos fuente de su implementación gráfica en un directorio llamado ProyectoGUIFuentes
+\end{itemize}
+
+Para mayor información sobre la forma de ejecutar un modelo MiniZinc a través de línea de comandos visite:
+
+\begin{itemize}
+  \item Modelamiento básico en MiniZinc: \href{https://www.minizinc.org/doc-2.2}{https://www.minizinc.org/doc-2.2}. 3/en/modelling.html
+  \item Modelos más complejos: https:// \href{http://www.minizinc.org/doc-2.2.3/en/}{www.minizinc.org/doc-2.2.3/en/} modelling2.html
+  \item Hacer un vídeo de máximo 15 minutos donde muestre su modelo y aplicación funcionando. Este videos servirá como sustentación de este proyecto, por lo tanto todos los miembros del grupo deben participar en el mismo. Más información sobre el video se encuentra en la sección 4.3.
+\end{itemize}
+
+\subsection{Entrada}
+La entrada se leerá de un archivo de texto *.txt con la siguiente información:
+
+\begin{enumerate}
+  \item La primera línea contiene un entero indicando el número de personas(es decir, conteniendo $n)$.
+  \item La segunda línea contiene un entero indicando el número de posibles opiniones (es decir, conteniendo $m$ ).
+  \item La siguiente línea contiene, una lista de $m$ valores correspondientes a la distribución de las personas según su opinión inicial, separados por comas, $p_{i}, i \in 1 . . m$.
+  \item La siguiente línea contiene, una lista de $m$ valores correspondientes a los valores de las opiniones posibles separados por comas, correspondientes, en su orden, a $v_{i}, i \in 1 . . m$.
+  \item Las siguientes $m$ líneas, contienen, cada una, una lista de 3 valores separados por comas, correspondientes, a la cantidad de personas con opinión $m$ y su nivel de resistencia (bajo, medio y alto respectivamente).
+  \item La siguiente línea contiene, un valor correspondiente al costo total máximo permitido (es decir, conteniendo $c t$ ).
+  \item Finalmente, la ultima linea contiene un valor correspondiente a la cantidad máxima de movimientos permitidos (es decir, maxMovs).
+\end{enumerate}
+
+El archivo correspondiente a la entrada del ejemplo de la sección 2.4 sería:
+
+10\\
+3\\
+3,3,4\\
+0.297,0.673,0.809
+
+1,2,0\\
+0,3,0\\
+2,1,1\\
+25\\
+5\\
+En el campus se compartirán ejemplos de entradas con sus respectivas salidas (Nota: es posible que en algunos casos haya varias soluciones que tengan el mismo valor para la función objetivo)
+
+\subsection{Salida}
+Para guardar la solución obtenida, la salida del modelo deberá registrarse en un archivo .txt con la siguiente información:
+
+\begin{enumerate}
+  \item La primera linea debe contener un número entero indicando la polarización final luego de mover las personas de una opinión a otra.
+  \item Las siguiente linea contiene un número entero indicando el nivel de resistencia baja, es decir, 1.
+  \item Las siguientes $m$ líneas, contienen, cada una, una lista de $m$ valores separados por comas, correspondientes, en su orden, a la cantidad de personas que se movieron de cada opinión a las $m$ opiniones posibles, considerando solo las personas con un nivel de resistencia bajo; es decir, cada línea contiene $x_{1, i, j}, i, j \in 1 . . m$.
+  \item las siguientes $2(m \times m)+2$ contienen el nivel de resistencia y la matriz de movimientos realizados para las resistencias medias y altas respectivamente, similar a como se define para el nivel bajo descrito anteriormente.
+\end{enumerate}
+
+El archivo correspondiente al ejemplo de la sección 2.4 sería:
+
+\begin{verbatim}
+0
+1
+0,1,0
+0,0,0
+0,2,0
+2
+0,2,0
+0,0,0
+0,1,0
+3
+0,0,0
+0,0,0
+0,1,0
+\end{verbatim}
+
+\subsection{Sobre el Informe...}
+El grupo deberá entregar un informe del proyecto, en formato pdf, que contenga, al menos, los siguientes aspectos:
+
+\begin{itemize}
+  \item El modelo: una descripción del modelo y una justificación de su adecuación al problema planteado.
+  \item Detalles importantes de implementación: lo más relevante de la implementación, sin incluir código.
+  \item El análisis de los árboles generados por su modelo para el ejemplo, y explicar sobre él cómo funcionó el mecanismo de Branch and Bound.
+  \item Pruebas: descripción de las pruebas realizadas a su implementación.
+  \item Análisis: de los resultados de las pruebas realizadas, buscando responder a los diferentes criterios de evaluación definidos en la rúbrica. Desarrolle y soporte su análisis utilizando los métodos apropiados (tablas, gráficos, indicadores estadísticos), donde puedan apreciarse\\
+las variaciones de acuerdo al tamaño y naturaleza de los datos de entrada. Explique claramente el significado de sus datos y cómo se analizaron.
+  \item Un enlace al video explicatorio de la interfaz gráfica
+  \item Conclusiones: Esta es una de las partes más interesantes del trabajo (pero no por ello la que más vale). En ella se espera que usted analice los resultados obtenidos y justifique claramente sus afirmaciones.
+\end{itemize}
+
+\subsection{Grupos de trabajo}
+El proyecto puede ser desarrollado por grupos de máximo 5 personas.
+
+\section{Entrega, sustentación y evaluación}
+\subsection{Entrega}
+La entrega se debe realizar vía el campus virtual en las fechas previstas para ello, por uno sólo de los integrantes del grupo. La fecha de entrega límite es el 12 de diciembre a las 23:59. La sustentación será mediante un video el cual debe cumplir con las condiciones descritas en la sección 4.3. Se debe subir al campus virtual en el enlace correspondiente a este proyecto un archivo comprimido .zip que siga la convención CódigodeEstudiante1-CódigodeEstudiante2-CódigodeEstudiante3-CódigodeEstudiante4-Proyecto2-AdaII.2025-II.zip. El comprimido deberá contener:
+
+\begin{enumerate}
+  \item Archivo Readme.txt que describa todos los archivos entregados y las instrucciones para ejecutar la aplicación.
+  \item Archivo Informe.pdf acorde a la Sección 3.3. Recuerde incluir el link al video de sustentación.
+  \item Archivo Proyecto.mzn con la implementación del modelo
+  \item Directorio DatosProyecto con los datos con que fue probado su modelo.
+  \item Directorio ProyectoGUIFuentes con los archivos fuente de la implementación de la interfáz gráfica
+  \item Directorio MisInstancias con las 5 instancias generadas por su equipo de trabajo para retar a otros proyectos que resuelvan el mismo problema.
+\end{enumerate}
+
+\subsection{Evaluación}
+La evaluación de cada proyecto se hará de acuerdo a la rúbrica publicada en el campus virtual, diseñada para observar los indicadores de logro asociados a este proyecto.
+
+\subsection{Sustentación}
+El trabajo debe ser sustentado por todos los autores por medio de un video de máximo 15 minutos. El video debe incluir:
+
+\begin{itemize}
+  \item Presentación del modelo (no el código) donde se identifica con precisión y corrección: (1) los parámetros, (2) las variables y (3) las restricciones, donde se identifica claramente cuando el modelo usa restricciones lineales, enteras o mixtas.
+  \item La función objetivo y cómo modelaron las restricciones.
+  \item Una descripción de las pruebas utilizadas para probar el modelo: (1) la bateria de pruebas\\
+utilizada, (2) los resultados de las pruebas, (3) las bondades y falencias del modelo (aclarando funciones auxiliares y tecnicas usadas para modelar restricciones implicacionales si las hay), (4) una argumentación adecuada sobre la eficiencia de la implementación y (5) una argumentación adecuada sobre sobre la optimalidad del modelo, dejando clara la metodología usada para el análisis.
+  \item Una explicación de la técnica branch and bound en el problema: (1) explicar claramente los árboles de búsqueda generados, (2) ilustrar claramente la técnica en un ejemplo y (3) mostrar ejemplos más grandes usando el visualizador de Minizinc, en caso de ser posible para ilustrar el mecanismo en acción. Para esto pueden usar el solver Gecode Gist de Minizinc, e intenten explicar que significa cada figura que genera el árbol (cuadros rojos, rombos verdes y naranja, etc).
+  \item La interfaz en funcionamiento y las conclusiones finales del trabajo.
+\end{itemize}
+
+La no asistencia a la sustentación tendrá como resultado una asignación de 0 .
+
+La idea es que lo que no sea debidamente sustentado no vale así funcione muy bien!!! Y que, del trabajo en grupo, es importante que todos aprendan, no sólo algunos.
+
+Éxitos!!!
+
+
+\end{document}

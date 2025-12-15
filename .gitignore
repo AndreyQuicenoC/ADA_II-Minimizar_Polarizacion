@@ -42,3 +42,20 @@ desktop.ini
 # Temporary files
 *.tmp
 *.bak
+
+# LaTeX auxiliary files
+*.aux
+*.out
+*.toc
+*.log
+*.synctex.gz
+*.fdb_latexmk
+*.fls
+
+# Temporary directories
+temp/
+tmp/
+
+# MiniZinc data files (temporales)
+*.dzn
+!tests/*.dzn

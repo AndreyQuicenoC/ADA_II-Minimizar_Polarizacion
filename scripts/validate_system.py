@@ -90,7 +90,7 @@ else:
 
 # Test 5: Estructura del modelo MiniZinc
 print("\n✓ Test 5: Modelo MiniZinc")
-mzn_file = ROOT_DIR / 'Proyecto.mzn'
+mzn_file = ROOT_DIR / 'model' / 'Proyecto.mzn'
 
 if mzn_file.exists():
     mzn_content = mzn_file.read_text(encoding='utf-8')
@@ -113,7 +113,7 @@ if mzn_file.exists():
     if all_ok:
         print("  ✓ Modelo MiniZinc estructuralmente completo")
 else:
-    print("  ✗ Archivo Proyecto.mzn no encontrado")
+    print("  ✗ Archivo model/Proyecto.mzn no encontrado")
 
 # Resumen final
 print("\n" + "=" * 80)

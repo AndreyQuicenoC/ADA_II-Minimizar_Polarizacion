@@ -6,7 +6,7 @@ Este proyecto implementa un modelo de optimización para minimizar la polarizaci
 
 ## Autores
 
-- Andrey Quiceño
+- Andrey 
 - Iván
 - Francesco  
 - Jonathan
@@ -42,7 +42,8 @@ pip install -r requirements.txt
 
 ```
 ADA_II-Minimizar_Polarizacion/
-├── Proyecto.mzn              # Modelo de optimización en MiniZinc
+├── model/                    # Modelo de optimización
+│   └── Proyecto.mzn         # Modelo MiniZinc
 ├── main.py                   # Punto de entrada de la aplicación
 ├── gui.py                    # Interfaz gráfica
 ├── gui_styles.py             # Estilos y temas de la GUI
@@ -51,7 +52,9 @@ ADA_II-Minimizar_Polarizacion/
 │   ├── output.py            # Procesador de salida de MiniZinc
 │   └── __init__.py
 ├── scripts/                  # Scripts de utilidad
-│   └── run_tests.py         # Ejecutor de batería de pruebas
+│   ├── run_tests.py         # Ejecutor de batería de pruebas
+│   ├── validate_system.py   # Validación del sistema
+│   └── build_exe.py         # Generador de ejecutable Windows
 ├── tests/                    # Archivos de prueba
 │   ├── Prueba1.txt - Prueba35.txt
 │   └── resultados.txt       # Resultados esperados
@@ -60,6 +63,7 @@ ADA_II-Minimizar_Polarizacion/
 ├── docs/                     # Documentación
 │   ├── Enunciado.tex        # Enunciado del proyecto
 │   ├── informe.tex          # Informe del proyecto
+│   ├── informe.pdf          # Informe compilado
 │   └── guion_sustentacion.md
 └── README.md
 ```
@@ -79,13 +83,30 @@ cd ADA_II-Minimizar_Polarizacion
 pip install -r requirements.txt
 ```
 
-### 3. Verificar MiniZinc
+**Nota**: La aplicación usa principalmente módulos estándar de Python (tkinter, subprocess, etc.). El único requisito adicional es PyInstaller si deseas generar el ejecutable.
 
+### 3. Instalar MiniZinc
+
+**⚠️ IMPORTANTE**: MiniZinc es OBLIGATORIO para que el proyecto funcione.
+
+#### Windows:
+1. Descargar desde: https://www.minizinc.org/
+2. Ejecutar el instalador
+3. **Marcar la opción "Add MiniZinc to PATH"** durante la instalación
+4. Reiniciar la computadora
+
+#### Verificar instalación:
 ```bash
 minizinc --version
 ```
 
-Si no está instalado, descargarlo de https://www.minizinc.org/
+Deberías ver algo como: `MiniZinc to FlatZinc converter, version 2.x.x`
+
+Si ves un error como `'minizinc' is not recognized`, significa que:
+- MiniZinc no está instalado, O
+- No está en el PATH del sistema
+
+**Solución**: Reinstala MiniZinc asegurándote de marcar "Add to PATH" y reinicia tu computadora.
 
 ## Uso
 
@@ -122,8 +143,24 @@ Este script:
 python input_output/input.py tests/Prueba1.txt temp/datos.dzn
 
 # Ejecutar MiniZinc
-minizinc --solver Gecode Proyecto.mzn temp/datos.dzn
+minizinc --solver Gecode model/Proyecto.mzn temp/datos.dzn
 ```
+
+## Generar Ejecutable para Windows
+
+Para crear un ejecutable independiente (.exe):
+
+```bash
+# Instalar PyInstaller (si no está instalado)
+pip install pyinstaller
+
+# Ejecutar script de build
+python scripts/build_exe.py
+```
+
+El ejecutable se generará en `dist/PolarizacionApp.exe`
+
+**⚠️ NOTA**: El ejecutable sigue requiriendo que MiniZinc esté instalado en el sistema del usuario.
 
 ## Formato de Entrada
 

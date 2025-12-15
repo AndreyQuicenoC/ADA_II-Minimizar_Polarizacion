@@ -101,8 +101,7 @@ constraint
 % y encontrar el valor en la posición central
 
 % Posiciones para la mediana (considerando n total de personas)
-int: median_pos_low = (n div 2);
-int: median_pos_high = ((n div 2) + 1);
+int: median_pos = (n + 1) div 2;  % Posición central (1-indexed)
 
 % Variable auxiliar: acumulado de personas hasta cada opinión
 array[1..m] of var 0..n: cumulative;
@@ -113,34 +112,17 @@ constraint forall(i in 2..m)(
 );
 
 % Determinar en qué opinión cae la mediana
-% Si n es par, promediamos las dos posiciones centrales
-% Si n es impar, tomamos el valor central
+var 1..m: median_opinion;
 
-var 1..m: median_opinion_low;
-var 1..m: median_opinion_high;
-
-% Para median_opinion_low: encontrar i tal que cumulative[i-1] < median_pos_low <= cumulative[i]
+% median_opinion es la primera opinión cuyo acumulado >= median_pos
 constraint forall(i in 1..m)(
-    (i = 1 /\ median_pos_low <= cumulative[1]) \/
-    (i > 1 /\ cumulative[i-1] < median_pos_low /\ median_pos_low <= cumulative[i])
-    -> median_opinion_low = i
+    (cumulative[i] >= median_pos) -> (
+        (i = 1 \/ cumulative[i-1] < median_pos) -> median_opinion = i
+    )
 );
 
-% Para median_opinion_high
-constraint forall(i in 1..m)(
-    (i = 1 /\ median_pos_high <= cumulative[1]) \/
-    (i > 1 /\ cumulative[i-1] < median_pos_high /\ median_pos_high <= cumulative[i])
-    -> median_opinion_high = i
-);
-
-% Calcular el valor de la mediana
-constraint if n mod 2 = 1 then
-    % n impar: la mediana es el valor en la posición central
-    median_value = v[median_opinion_high]
-else
-    % n par: la mediana es el promedio de los dos valores centrales
-    median_value = (v[median_opinion_low] + v[median_opinion_high]) / 2.0
-endif;
+% El valor de la mediana es el valor de esa opinión
+constraint median_value = v[median_opinion];
 
 %-----------------------------------------------------------------------------
 % FUNCIÓN OBJETIVO: MINIMIZAR POLARIZACIÓN
